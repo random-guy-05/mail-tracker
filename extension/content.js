@@ -232,9 +232,8 @@
   function commit(body) {
     const id = body.dataset.mtId;
     if (!id || body.dataset.mtOff === '1' || committed.has(id)) return;
-    const inBody = [...body.querySelectorAll('img')].some((img) => pixelIdFromSrc(img.getAttribute('src') || '') === id);
-    if (!inBody) return;
     committed.add(id);
+    console.info('[mail-tracker] sent', id);
 
     const root = composeRoot(body);
     const inline = !body.closest('[role="dialog"]');
