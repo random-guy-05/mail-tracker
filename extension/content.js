@@ -127,12 +127,18 @@
 
   function composeRoot(body) {
     let n = body;
-    for (let depth = 0; n.parentElement && depth < 25; depth++) {
+    for (let depth = 0; n.parentElement && depth < 30; depth++) {
       n = n.parentElement;
-      if (n.querySelectorAll(BODY).length > 1) return null;
-      if (n.querySelector('input[name="subjectbox"]')) return n;
+      const subjects = n.querySelectorAll('input[name="subjectbox"]');
+      if (subjects.length > 1) return null;
+      if (subjects.length === 1) return n;
     }
     return null;
+  }
+
+  // The Gmail account this tab is signed in to ("Inbox - you@gmail.com - Gmail").
+  function currentAccount() {
+    return document.title.match(/[\w.+-]+@[\w-]+(\.[\w-]+)+/)?.[0]?.toLowerCase() || null;
   }
 
   // Gmail snapshots the draft before Send handlers run, so tracking is added while
@@ -249,7 +255,7 @@
       : [];
     const threadId = inline ? visibleEl('h2[data-legacy-thread-id]')?.getAttribute('data-legacy-thread-id') || null : null;
 
-    saveRecord({ id, subject, to, sentAt: Date.now(), threadId });
+    saveRecord({ id, subject, to, sentAt: Date.now(), threadId, from: currentAccount() });
   }
 
   const inputTimers = new WeakMap();
@@ -295,6 +301,8 @@
     if (!a || a.closest('[contenteditable="true"]')) return;
     const parsed = parseClickUrl(a.getAttribute('href')) || parseClickUrl(a.getAttribute('data-saferedirecturl'));
     if (!parsed) return;
+    const from = tracked[parsed.id]?.from;
+    if (from && from !== currentAccount()) return; // recipient's click: let it count
     e.preventDefault();
     e.stopImmediatePropagation();
     window.open(parsed.url, '_blank', 'noopener,noreferrer');
@@ -334,10 +342,14 @@
     for (const img of document.querySelectorAll('.a3s img, .ii img')) {
       const id = pixelIdFromSrc(img.getAttribute('src') || '');
       if (!id || img.closest(BODY)) continue;
-      if (!img.dataset.mtSeen) {
+      // Opening your email as the recipient (another account in this Chrome) must count.
+      const from = tracked[id]?.from;
+      const mine = !from || from === currentAccount();
+      if (!img.dataset.mtSeen && mine) {
         img.dataset.mtSeen = '1';
         seen.push(id);
       }
+      if (!mine) continue; // no labels inside the recipient's copy
       if (img.closest('.gmail_quote, blockquote')) continue; // our pixel quoted in someone's reply
 
       if (!tracked[id]) continue; // not an email you sent from this browser
