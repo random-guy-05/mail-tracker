@@ -100,7 +100,7 @@ function render() {
 
 (async () => {
   const { tracked = {} } = await chrome.storage.local.get('tracked');
-  const recs = Object.values(tracked).sort((a, b) => (b.sentAt || 0) - (a.sentAt || 0)).slice(0, 100);
+  const recs = Object.values(tracked).filter((r) => r.sentAt).sort((a, b) => (b.sentAt || 0) - (a.sentAt || 0)).slice(0, 100);
   let stats = {};
   if (recs.length) {
     const res = await chrome.runtime.sendMessage({ type: 'stats', ids: recs.map((r) => r.id) });

@@ -136,6 +136,10 @@
   // you write (on compose open, on typing, on blur) and kept in place until Send.
   function prepare(body) {
     if (!configured() || !settings.enabled || body.dataset.mtOff === '1') return;
+    // Only the visible message editor; Gmail keeps hidden editables around too.
+    if (body.offsetParent === null || body.closest('[aria-hidden="true"]')) return;
+    // If Gmail keeps stripping the image out of this editor, stop fighting it.
+    if (Number(body.dataset.mtReadds || 0) > 3) return;
     let changed = false;
     // Gmail sometimes rebuilds the editor element mid-compose, so the id also lives on
     // the compose window; otherwise one email would get a second id.
@@ -183,6 +187,7 @@
       img.setAttribute('alt', '');
       img.setAttribute('style', 'width:1px;height:1px;border:0');
       body.appendChild(img);
+      body.dataset.mtReadds = String(Number(body.dataset.mtReadds || 0) + 1);
       changed = true;
       // The browser fetches the pixel as soon as it's inserted; don't count that.
       selfPing([id]);
@@ -333,10 +338,8 @@
       }
       if (img.closest('.gmail_quote, blockquote')) continue; // our pixel quoted in someone's reply
 
-      if (!tracked[id]) {
-        // Sent from another browser with this extension: learn it.
-        saveRecord({ id, subject: heading?.textContent.trim() || '(no subject)', to: [], sentAt: null, threadId });
-      } else if (threadId && !tracked[id].threadId) {
+      if (!tracked[id]) continue; // not an email you sent from this browser
+      if (threadId && !tracked[id].threadId) {
         saveRecord({ id, threadId });
       }
 
@@ -454,7 +457,6 @@
       if (!s.opens && !s.clicks) chips.push(chip('mt-unopened', 'Unopened', 'clock'));
       if (s.opens) chips.push(chip('mt-opened', 'Opened', 'eye', s.opens));
       if (s.clicks) chips.push(chip('mt-clicks', 'Clicked', 'click', s.clicks));
-      if (s.lastOpen && Date.now() - s.lastOpen < 10 * 60_000) chips[chips.length - 1].classList.add('mt-live');
     }
     el.replaceChildren(...chips);
     if (popFor === id && pop?.classList.contains('mt-show')) fillPopover(id);
