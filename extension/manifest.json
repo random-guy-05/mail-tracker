@@ -1,0 +1,18 @@
+{
+  "manifest_version": 3,
+  "name": "Mail Tracker (personal)",
+  "version": "1.0.0",
+  "description": "Open and click tracking for Gmail, backed by your own server.",
+  "permissions": ["storage"],
+  "background": { "service_worker": "background.js" },
+  "content_scripts": [
+    {
+      "matches": ["https://mail.google.com/*"],
+      "js": ["hmac.js", "content.js"],
+      "css": ["content.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": { "default_popup": "popup.html", "default_title": "Mail Tracker" },
+  "options_page": "options.html"
+}

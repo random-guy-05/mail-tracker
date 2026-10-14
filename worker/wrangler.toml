@@ -1,0 +1,8 @@
+name = "mail-tracker"
+main = "src/index.js"
+compatibility_date = "2025-09-01"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "mail-tracker"
+database_id = "f6a0475b-7d65-442a-beb3-5d3ca889b3be"   # printed by: npx wrangler d1 create mail-tracker

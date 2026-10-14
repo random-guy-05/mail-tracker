@@ -1,0 +1,90 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Mail Tracker settings</title>
+<style>
+  :root {
+    --violet: #6d4aff; --violet-bg: #f0ebff; --text: #1f1f1f; --muted: #6b7076; --line: #e3e5e8;
+    --bg: #f6f7f9; --card: #fff; --field: #fff; --ok: #0f8a4b; --err: #b3261e;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --violet: #a993ff; --violet-bg: #2a2342; --text: #ececec; --muted: #9aa0a6; --line: #34373b;
+            --bg: #121314; --card: #1b1c1e; --field: #222427; --ok: #5fd49a; --err: #f2b8b5; }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.5 "Google Sans", Roboto, system-ui, sans-serif; }
+  main { max-width: 560px; margin: 48px auto; padding: 0 16px; }
+  .brand { display: flex; align-items: center; gap: 12px; margin-bottom: 24px; }
+  .logo { width: 40px; height: 40px; border-radius: 12px; display: grid; place-items: center; color: #fff;
+          background: linear-gradient(135deg, #8b6cff, #5b34f5); box-shadow: 0 6px 16px -6px rgba(109, 74, 255, .7); }
+  .logo svg { width: 22px; height: 22px; fill: currentColor; }
+  h1 { margin: 0; font-size: 22px; font-weight: 600; }
+  .sub { color: var(--muted); font-size: 13px; }
+  .card { background: var(--card); border-radius: 18px; padding: 22px; box-shadow: 0 0 0 1px var(--line), 0 8px 24px -16px rgba(0, 0, 0, .25); margin-bottom: 16px; }
+  .card h2 { margin: 0 0 4px; font-size: 15px; font-weight: 600; }
+  label { display: block; font-size: 13px; font-weight: 500; margin: 16px 0 6px; }
+  input[type=text], input[type=password] {
+    width: 100%; height: 42px; padding: 0 14px; font: inherit; color: var(--text); background: var(--field);
+    border: 1px solid var(--line); border-radius: 10px; outline: none; transition: border-color .15s, box-shadow .15s;
+  }
+  input:focus { border-color: var(--violet); box-shadow: 0 0 0 4px var(--violet-bg); }
+  .hint { color: var(--muted); font-size: 12px; margin-top: 6px; }
+  code { font-size: 12px; padding: 1px 5px; border-radius: 5px; background: var(--violet-bg); color: var(--violet); }
+  .switch { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--line); cursor: pointer; }
+  .switch input { appearance: none; width: 42px; height: 24px; border-radius: 999px; background: var(--line); position: relative; cursor: pointer; transition: background .2s; flex: none; margin: 0; }
+  .switch input::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px rgba(0, 0, 0, .3); transition: transform .2s; }
+  .switch input:checked { background: var(--violet); }
+  .switch input:checked::after { transform: translateX(18px); }
+  .switch b { display: block; font-weight: 500; }
+  .switch span span { color: var(--muted); font-size: 12px; }
+  .row { display: flex; gap: 10px; margin-top: 22px; align-items: center; flex-wrap: wrap; }
+  button { height: 40px; padding: 0 18px; font: inherit; font-weight: 500; border-radius: 10px; border: 1px solid var(--line); background: var(--card); color: var(--text); cursor: pointer; transition: transform .1s, box-shadow .15s; }
+  button:hover { box-shadow: 0 2px 8px -2px rgba(0, 0, 0, .2); }
+  button:active { transform: scale(.98); }
+  button.primary { background: var(--violet); border-color: var(--violet); color: #fff; }
+  button.danger { color: var(--err); }
+  #status { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; }
+  #status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+  #status:empty::before { display: none; }
+  .ok { color: var(--ok); } .err { color: var(--err); }
+</style>
+</head>
+<body>
+<main>
+  <div class="brand">
+    <div class="logo"><svg viewBox="0 0 24 24"><path d="M12 5C6.6 5 2.9 9.1 1.5 12c1.4 2.9 5.1 7 10.5 7s9.1-4.1 10.5-7C21.1 9.1 17.4 5 12 5zm0 11.5a4.5 4.5 0 110-9 4.5 4.5 0 010 9zm0-2.5a2 2 0 100-4 2 2 0 000 4z"/></svg></div>
+    <div><h1>Mail Tracker</h1><div class="sub">Open and click tracking for Gmail, on your own server.</div></div>
+  </div>
+
+  <section class="card">
+    <h2>Connection</h2>
+    <label for="baseUrl">Tracker URL</label>
+    <input id="baseUrl" type="text" placeholder="https://mail-tracker.yourname.workers.dev" spellcheck="false">
+    <div class="hint">The URL printed by <code>npm run deploy</code>.</div>
+
+    <label for="secret">Secret</label>
+    <input id="secret" type="password" spellcheck="false">
+    <div class="hint">The value you gave <code>wrangler secret put TRACKER_SECRET</code>.</div>
+
+    <label class="switch" for="enabled">
+      <span><b>Track new emails by default</b><span>You can still switch it off per email from the compose window.</span></span>
+      <input id="enabled" type="checkbox">
+    </label>
+
+    <div class="row">
+      <button id="save" class="primary">Save</button>
+      <button id="test">Test connection</button>
+      <span id="status"></span>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>History</h2>
+    <div class="hint">Removes the list of tracked emails stored in this browser. Gmail labels for them will disappear.</div>
+    <div class="row"><button id="clear" class="danger">Clear tracked-email list</button></div>
+  </section>
+</main>
+<script src="options.js"></script>
+</body>
+</html>
