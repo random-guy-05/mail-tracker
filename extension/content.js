@@ -19,7 +19,10 @@
   let visibleIds = new Set();
 
   const base = () => (settings.baseUrl || '').trim().replace(/\/+$/, '');
-  const configured = () => Boolean(base() && settings.secret);
+  // After the extension is reloaded, scripts already in open Gmail tabs lose access to
+  // chrome.* APIs. They must go quiet, or they'd add images that are never recorded.
+  const alive = () => Boolean(globalThis.chrome?.runtime?.id);
+  const configured = () => alive() && Boolean(base() && settings.secret);
 
   // ---------- settings & storage ----------
 
